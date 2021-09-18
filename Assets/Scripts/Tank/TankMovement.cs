@@ -121,4 +121,8 @@ public class TankMovement : MonoBehaviour
         // Apply this rotation to the rigidbody's rotation.
         m_Rigidbody.MoveRotation (m_Rigidbody.rotation * turnRotation);
     }
+
+    public int getPlayerNumber(){
+        return m_PlayerNumber;
+    }
 }
