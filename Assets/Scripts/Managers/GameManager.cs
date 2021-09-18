@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +12,8 @@ public class GameManager : MonoBehaviour
     public CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
     public Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
     public GameObject m_TankPrefab;             // Reference to the prefab the players will control.
+    public GameObject m_AITankPrefab;           // Reference to AI Tank prefab
+    public AITankManager[] m_AITanks;           // A collection of managers for AITanks
     public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
 
 
@@ -45,6 +49,14 @@ public class GameManager : MonoBehaviour
             m_Tanks[i].m_PlayerNumber = i + 1;
             m_Tanks[i].Setup();
         }
+
+        for (int i = 0; i < m_AITanks.Length; i++)
+          {
+            // create enemy tanks
+            m_AITanks[i].m_Instance = 
+                Instantiate(m_AITankPrefab, m_AITanks[i].m_SpawnPoint.position, m_AITanks[i].m_SpawnPoint.rotation) as GameObject;
+            m_AITanks[i].Setup();
+          }
     }
 
 
@@ -118,9 +130,35 @@ public class GameManager : MonoBehaviour
         // Clear the text from the screen.
         m_MessageText.text = string.Empty;
 
+        // Dictionary to store 
+        Dictionary<Int32, DateTime> deadTanks = new Dictionary<Int32, DateTime>();
+
         // While there is not one tank left...
-        while (!OneTankLeft())
+        while (!PlayersStillAlive())
         {
+            for (int i = 0; i < m_AITanks.Length; i++)
+            {
+                if (!(m_AITanks[i].m_Instance.activeSelf) && !(deadTanks.ContainsKey(i)))
+                {
+                    var datetime = DateTime.Now;
+                    deadTanks.Add(i, datetime.AddSeconds(10));
+                }
+            }
+            List<int> indexToDelete = new List<int>();
+            foreach(var item in deadTanks)
+            { 
+              if (item.Value.CompareTo(DateTime.Now) <= 0)
+              {
+                  m_AITanks[item.Key].Reset();
+                  indexToDelete.Add(item.Key);
+              }
+            }
+
+            for (int i = 0; i < indexToDelete.Count; i++)
+            {
+              deadTanks.Remove(indexToDelete[i]);
+            }
+
             // ... return on the next frame.
             yield return null;
         }
@@ -155,7 +193,7 @@ public class GameManager : MonoBehaviour
 
 
     // This is used to check if there is one or fewer tanks remaining and thus the round should end.
-    private bool OneTankLeft()
+    private bool PlayersStillAlive()
     {
         // Start the count of tanks left at zero.
         int numTanksLeft = 0;
@@ -169,7 +207,7 @@ public class GameManager : MonoBehaviour
         }
 
         // If there are one or fewer tanks remaining return true, otherwise return false.
-        return numTanksLeft <= 1;
+        return numTanksLeft <= 0;
     }
 
 
