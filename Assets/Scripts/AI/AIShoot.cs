@@ -16,7 +16,6 @@ public class AIShoot : MonoBehaviour
     public float m_MaxChargeTime = 0.75f;       // How long the shell can charge for before it is fired at max force.
     public float firing_downtime = 1.00f;
 
-
     private string m_FireButton;                // The input axis that is used for launching shells.
     private float m_CurrentLaunchForce;         // The force that will be given to the shell when the fire button is released.
     private float m_ChargeSpeed;                // How fast the launch force increases, based on the max charge time.
@@ -50,9 +49,12 @@ public class AIShoot : MonoBehaviour
 
     private void Update ()
     {
+       if (!this.enabled)
+          return;
+
        distToPlayer = Vector3.Distance(player.transform.position, transform.position);
 
-       if (distToPlayer > 5f && distToPlayer < 30f && (DateTime.Now - timeLastShotFired).TotalSeconds > firing_downtime)
+       if (distToPlayer > 5f && distToPlayer < 20f && (DateTime.Now - timeLastShotFired).TotalSeconds > firing_downtime)
        {
           m_CurrentLaunchForce = distToPlayer;
           Fire ();

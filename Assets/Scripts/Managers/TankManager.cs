@@ -71,14 +71,14 @@ public class TankManager
     {
         //m_Movement.enabled = true;
         m_Shooting.enabled = false;
-        Debug.Log("Shooting disabled!");
+        // Debug.Log("Shooting disabled!");
 
     } 
 
     public void EnableShooting ()
     {
         //m_Movement.enabled = true;
-        Debug.Log("Shooting enabled!");
+        // Debug.Log("Shooting enabled!");
         m_Shooting.enabled = true;
 
         m_CanvasGameObject.SetActive (true);

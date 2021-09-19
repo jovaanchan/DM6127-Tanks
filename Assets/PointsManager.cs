@@ -38,6 +38,16 @@ public class PointsManager : MonoBehaviour
 
     }
 
+    public int GetScore()
+    {
+      return this.score;
+    }
+
+    public int GetHighScore()
+    {
+      return this.highscore;
+    }
+
     public void ResetScore()
     {
         score = 0;

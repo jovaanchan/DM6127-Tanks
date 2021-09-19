@@ -60,6 +60,7 @@ public class GameManager : MonoBehaviour
             // create enemy tanks
             m_AITanks[i].m_Instance =
                 Instantiate(m_AITankPrefab, m_AITanks[i].m_SpawnPoint.position, m_AITanks[i].m_SpawnPoint.rotation) as GameObject;
+            m_AITanks[i].m_AINumber = i + 1;
             m_AITanks[i].Setup();
           }
     }
@@ -93,18 +94,7 @@ public class GameManager : MonoBehaviour
         // Once execution has returned here, run the 'RoundEnding' coroutine, again don't return until it's finished.
         yield return StartCoroutine (RoundEnding());
 
-        // This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
-        if (m_GameWinner != null)
-        {
-            // If there is a game winner, restart the level.
-            Application.LoadLevel (Application.loadedLevel);
-        }
-        else
-        {
-            // If there isn't a winner yet, restart this coroutine so the loop continues.
-            // Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
-            StartCoroutine (GameLoop ());
-        }
+        StartCoroutine (GameLoop ());
     }
 
 
@@ -113,15 +103,13 @@ public class GameManager : MonoBehaviour
         // As soon as the round starts reset the tanks and make sure they can't move.
         ResetAllTanks ();
         DisableTankControl ();
-
         ResetPoints();
 
         // Snap the camera's zoom and position to something appropriate for the reset tanks.
         m_CameraControl.SetStartPositionAndSize ();
 
         // Increment the round number and display text showing the players what round it is.
-        m_RoundNumber++;
-        m_MessageText.text = "ROUND " + m_RoundNumber;
+        m_MessageText.text = "ROUND START";
 
         // Wait for the specified length of time until yielding control back to the game loop.
         yield return m_StartWait;
@@ -142,29 +130,9 @@ public class GameManager : MonoBehaviour
         // While there is not one tank left...
         while (!PlayersStillAlive())
         {
-            for (int i = 0; i < m_AITanks.Length; i++)
-            {
-                if (!(m_AITanks[i].m_Instance.activeSelf) && !(deadTanks.ContainsKey(i)))
-                {
-                    var datetime = DateTime.Now;
-                    deadTanks.Add(i, datetime.AddSeconds(10));
-                }
-            }
-            List<int> indexToDelete = new List<int>();
-            foreach(var item in deadTanks)
-            {
-              if (item.Value.CompareTo(DateTime.Now) <= 0)
-              {
-                  m_AITanks[item.Key].Reset();
-                  indexToDelete.Add(item.Key);
-              }
-            }
-
-            for (int i = 0; i < indexToDelete.Count; i++)
-            {
-              deadTanks.Remove(indexToDelete[i]);
-            }
-
+            RespawnDeadTanks(deadTanks);
+            ActivateOtherTanks();
+            IncreaseSpeedOfTanks();
             // ... return on the next frame.
             yield return null;
         }
@@ -175,19 +143,6 @@ public class GameManager : MonoBehaviour
     {
         // Stop tanks from moving.
         DisableTankControl ();
-
-        // Clear the winner from the previous round.
-        m_RoundWinner = null;
-
-        // See if there is a winner now the round is over.
-        m_RoundWinner = GetRoundWinner ();
-
-        // If there is a winner, increment their score.
-        if (m_RoundWinner != null)
-            m_RoundWinner.m_Wins++;
-
-        // Now the winner's score has been incremented, see if someone has one the game.
-        m_GameWinner = GetGameWinner ();
 
         // Get a message based on the scores and whether or not there is a game winner and display it.
         string message = EndMessage ();
@@ -254,24 +209,15 @@ public class GameManager : MonoBehaviour
     private string EndMessage()
     {
         // By default when a round ends there are no winners so the default end message is a draw.
-        string message = "DRAW!";
+        int score = PointsManager.instance.GetScore();
+        string message = "You got " + score + " points!";
 
-        // If there is a winner then change the message to reflect that.
-        if (m_RoundWinner != null)
-            message = m_RoundWinner.m_ColoredPlayerText + " WINS THE ROUND!";
-
-        // Add some line breaks after the initial message.
-        message += "\n\n\n\n";
-
-        // Go through all the tanks and add each of their scores to the message.
-        for (int i = 0; i < m_Tanks.Length; i++)
+        int highScore = PointsManager.instance.GetHighScore();
+        if (score == highScore)
         {
-            message += m_Tanks[i].m_ColoredPlayerText + ": " + m_Tanks[i].m_Wins + " WINS\n";
+          message += "\n\n";
+          message += "It's a new highscore!";
         }
-
-        // If there is a game winner, change the entire message to reflect that.
-        if (m_GameWinner != null)
-            message = m_GameWinner.m_ColoredPlayerText + " WINS THE GAME!";
 
         return message;
     }
@@ -284,6 +230,10 @@ public class GameManager : MonoBehaviour
         {
             m_Tanks[i].Reset();
         }
+        for (int i = 0; i < m_AITanks.Length; i++)
+        {
+          m_AITanks[i].Reset();
+        }
     }
 
 
@@ -292,13 +242,11 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             m_Tanks[i].EnableControl();
-            m_Tanks[i].DisableShooting(); //
-        }
+            m_Tanks[i].DisableShooting();
 
-        for (int i = 0; i < m_AITanks.Length; i++)
-        {
-            m_AITanks[i].EnableControl();
         }
+        
+        m_AITanks[0].EnableControl();
     }
 
 
@@ -308,7 +256,7 @@ public class GameManager : MonoBehaviour
         {
             m_Tanks[i].DisableControl();
         }
-
+        
         for (int i = 0; i < m_AITanks.Length; i++)
         {
             m_AITanks[i].DisableControl();
@@ -319,6 +267,60 @@ public class GameManager : MonoBehaviour
     {
         PointsManager.instance.ResetScore();
         PointsManager.instance.Start();
+    }
+
+    private void RespawnDeadTanks(Dictionary<Int32, DateTime> deadTanks)
+    {
+      for (int i = 0; i < m_AITanks.Length; i++)
+      {
+          if (!(m_AITanks[i].m_Instance.activeSelf) && !(deadTanks.ContainsKey(i)))
+          {
+              var datetime = DateTime.Now;
+              deadTanks.Add(i, datetime.AddSeconds(10));
+          }
+      }
+      List<int> indexToDelete = new List<int>();
+      foreach(var item in deadTanks)
+      {
+        if (item.Value.CompareTo(DateTime.Now) <= 0)
+        {
+            m_AITanks[item.Key].Reset();
+            indexToDelete.Add(item.Key);
+        }
+      }
+
+      for (int i = 0; i < indexToDelete.Count; i++)
+      {
+        deadTanks.Remove(indexToDelete[i]);
+      }
+    }
+
+    private void ActivateOtherTanks()
+    {
+      int[] pointsToAchieve = new int[] {15, 30, 45, 60};
+      int score = PointsManager.instance.GetScore();
+      for (int i = 0; i < pointsToAchieve.Length; i++)
+      {
+        if (score < pointsToAchieve[i])
+          break;
+        m_AITanks[i+1].EnableControl();
+      } 
+    }
+
+    public void IncreaseSpeedOfTanks()
+    {
+      int score = PointsManager.instance.GetScore();
+      if (score % 5 == 0 && score != 0)
+      {
+        for (int i = 0; i < m_AITanks.Length; i++)
+        {
+          if (!m_AITanks[i].m_Instance.activeSelf)
+          {
+            break;
+          }
+          m_AITanks[i].SetSpeed(score);
+        }
+      }
     }
 
     public void EnableShooting()
@@ -349,5 +351,4 @@ public class GameManager : MonoBehaviour
             m_Tanks[0].DisableShooting();
         }
     }
-
 }
