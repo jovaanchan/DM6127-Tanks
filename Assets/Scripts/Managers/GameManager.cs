@@ -12,7 +12,9 @@ public class GameManager : MonoBehaviour
     public GameObject m_TankPrefab;             // Reference to the prefab the players will control.
     public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
 
-    private CoinSpawner coinSpawner;
+    public float AmmoTime;
+    public Slider AmmoSlider;
+    private bool stopTimer;
 
     private int m_RoundNumber;                  // Which round the game is currently on.
     private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
@@ -252,7 +254,10 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             m_Tanks[i].EnableControl();
+            m_Tanks[i].EnableShooting();
         }
+        m_Tanks[0].DisableShooting();
+
     }
 
 
@@ -270,9 +275,33 @@ public class GameManager : MonoBehaviour
         PointsManager.instance.Start();
     }
 
-    // void Update()
-    // {
-    //     CoinText.text = "Points : " + coins;
-    // }
+    public void EnableShooting()
+    {
+        m_Tanks[0].EnableShooting();
+        StartCoroutine(timer());
+        startTimer();
+        
+    }
+
+    public void startTimer()
+    {
+        AmmoSlider.maxValue = AmmoTime;
+        AmmoSlider.value = AmmoTime;
+
+    }
+
+    void Update()
+    {
+        //needs fixing...
+        float time = Time.deltaTime;
+        AmmoSlider.value = time/AmmoTime;
+
+    }
+
+    IEnumerator timer()
+    {
+        yield return new WaitForSeconds(5);
+        m_Tanks[0].DisableShooting();
+    }
 
 }
