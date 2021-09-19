@@ -292,7 +292,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             m_Tanks[i].EnableControl();
-            // m_Tanks[i].EnableShooting(); // 
+            m_Tanks[i].DisableShooting(); //
         }
 
         for (int i = 0; i < m_AITanks.Length; i++)
@@ -324,9 +324,12 @@ public class GameManager : MonoBehaviour
     public void EnableShooting()
     {
         m_Tanks[0].EnableShooting();
+
+        // record the starting time of the shooting ability
         shootingEnabledTime = DateTime.Now;
+
+        // fill the ammo indicator
         fillAmmoSlider();
-        StartCoroutine (timer());
     }
 
     public void fillAmmoSlider()
@@ -337,16 +340,14 @@ public class GameManager : MonoBehaviour
 
     public void updateAmmoSlider()
     {
+        float timeElapsed = (float)(DateTime.Now - shootingEnabledTime).TotalSeconds;
+
         if (AmmoSlider.value > 0)
         {
-            AmmoSlider.value = AmmoTime - (float)(DateTime.Now - shootingEnabledTime).TotalSeconds;
+            AmmoSlider.value = AmmoTime - timeElapsed;
+        } else {
+            m_Tanks[0].DisableShooting();
         }
-    }
-
-    IEnumerator timer()
-    {
-        yield return new WaitForSeconds(AmmoTime);
-        m_Tanks[0].DisableShooting();
     }
 
 }

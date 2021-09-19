@@ -18,7 +18,7 @@ public class AITankManager
 
     // private TankMovement m_Movement;                        // Reference to tank's movement script, used to disable and enable control.
     private AIShoot m_Shooting;                             // Reference to tank's shooting script, used to disable and enable control.
-    private GameObject m_CanvasGameObject;                  // Used to disable the world space UI during the Starting and Ending phases of each round.
+    private GameObject m_CanvasGameObject;                  // Used to disable the world space UI during the Starting and Ending phases of each round.                         // Used to prevent moving before the round starts
 
 
     public void Setup ()
@@ -52,7 +52,6 @@ public class AITankManager
     {
         // m_Movement.enabled = false;
         m_Shooting.enabled = false;
-
         m_CanvasGameObject.SetActive (false);
     }
 
@@ -62,7 +61,6 @@ public class AITankManager
     {
         // m_Movement.enabled = true;
         m_Shooting.enabled = true;
-
         m_CanvasGameObject.SetActive (true);
     }
 
