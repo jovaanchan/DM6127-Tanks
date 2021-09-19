@@ -12,21 +12,23 @@ public class AmmoScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
         transform.Rotate(90*Time.deltaTime, 0, 0);
+
+        //needs fixing...
+        gameManager.updateAmmoSlider();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         //PointsManager.instance.AddPoint();
         //CoinSound.Play();
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        gameManager.EnableShooting();        
+        gameManager.EnableShooting();
         RemoveAmmo();
     }
 

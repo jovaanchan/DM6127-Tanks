@@ -16,9 +16,10 @@ public class GameManager : MonoBehaviour
     public AITankManager[] m_AITanks;           // A collection of managers for AITanks
     public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
 
-    public float AmmoTime;
     public Slider AmmoSlider;
     private bool stopTimer;
+    private DateTime shootingEnabledTime;
+    public float AmmoTime;
 
     private int m_RoundNumber;                  // Which round the game is currently on.
     private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
@@ -291,7 +292,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             m_Tanks[i].EnableControl();
-            m_Tanks[i].EnableShooting();
+            // m_Tanks[i].EnableShooting(); // 
         }
 
         for (int i = 0; i < m_AITanks.Length; i++)
@@ -323,29 +324,28 @@ public class GameManager : MonoBehaviour
     public void EnableShooting()
     {
         m_Tanks[0].EnableShooting();
-        StartCoroutine(timer());
-        startTimer();
-
+        shootingEnabledTime = DateTime.Now;
+        fillAmmoSlider();
+        StartCoroutine (timer());
     }
 
-    public void startTimer()
+    public void fillAmmoSlider()
     {
         AmmoSlider.maxValue = AmmoTime;
         AmmoSlider.value = AmmoTime;
-
     }
 
-    void Update()
+    public void updateAmmoSlider()
     {
-        //needs fixing...
-        float time = Time.deltaTime;
-        AmmoSlider.value = time/AmmoTime;
-
+        if (AmmoSlider.value > 0)
+        {
+            AmmoSlider.value = AmmoTime - (float)(DateTime.Now - shootingEnabledTime).TotalSeconds;
+        }
     }
 
     IEnumerator timer()
     {
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(AmmoTime);
         m_Tanks[0].DisableShooting();
     }
 
