@@ -4,7 +4,7 @@ public class CameraControl : MonoBehaviour
 {
     public float m_DampTime = 0.2f;                 // Approximate time for the camera to refocus.
     public float m_ScreenEdgeBuffer = 4f;           // Space between the top/bottom most target and the screen edge.
-    public float m_MinSize = 6.5f;                  // The smallest orthographic size the camera can be.
+    public float m_MinSize = 15f;                  // The smallest orthographic size the camera can be.
     [HideInInspector] public Transform[] m_Targets; // All the targets the camera needs to encompass.
 
 
@@ -109,9 +109,9 @@ public class CameraControl : MonoBehaviour
         size += m_ScreenEdgeBuffer;
 
         // Make sure the camera's size isn't below the minimum.
-        size = Mathf.Max (size, m_MinSize);
+        size = Mathf.Max(size, m_MinSize);
 
-        return size;
+        return 15f;
     }
 
 

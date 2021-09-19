@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 ﻿{"cameraMode":{"drawMode":0,"name":"Shaded","section":"Shading Mode"},"sceneLighting":true,"audioPlay":false,"sceneViewState":{"m_AlwaysRefresh":false,"showFog":true,"showSkybox":true,"showFlares":true,"showImageEffects":true,"showParticleSystems":true,"showVisualEffectGraphs":true,"m_FxEnabled":true},"in2DMode":true,"pivot":{"x":421.6227722167969,"y":129.20750427246095,"z":-45.18537521362305},"rotation":{"x":0.0,"y":0.0,"z":0.0,"w":1.0},"size":167.96083068847657,"orthographic":true}
+=======
+﻿{"cameraMode":{"drawMode":0,"name":"Shaded","section":"Shading Mode"},"sceneLighting":true,"audioPlay":false,"sceneViewState":{"m_AlwaysRefresh":false,"showFog":true,"showSkybox":true,"showFlares":true,"showImageEffects":true,"showParticleSystems":true,"showVisualEffectGraphs":true,"m_FxEnabled":true},"in2DMode":false,"pivot":{"x":13.0,"y":0.6049057841300964,"z":-5.073882102966309},"rotation":{"x":0.3810683488845825,"y":0.3621716797351837,"z":-0.16539743542671204,"w":0.8344259858131409},"size":33.48759078979492,"orthographic":false}
+>>>>>>> luke/AIShoot
