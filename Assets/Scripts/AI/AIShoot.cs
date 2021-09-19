@@ -14,6 +14,7 @@ public class AIShoot : MonoBehaviour
     public float m_MinLaunchForce = 15f;        // The force given to the shell if the fire button is not held.
     public float m_MaxLaunchForce = 30f;        // The force given to the shell if the fire button is held for the max charge time.
     public float m_MaxChargeTime = 0.75f;       // How long the shell can charge for before it is fired at max force.
+    public float firing_downtime = 1.00f;
 
 
     private string m_FireButton;                // The input axis that is used for launching shells.
@@ -51,9 +52,9 @@ public class AIShoot : MonoBehaviour
     {
        distToPlayer = Vector3.Distance(player.transform.position, transform.position);
 
-       if (distToPlayer > 15f && distToPlayer < 30f && (DateTime.Now - timeLastShotFired).TotalSeconds > 0.75)
+       if (distToPlayer > 5f && distToPlayer < 30f && (DateTime.Now - timeLastShotFired).TotalSeconds > firing_downtime)
        {
-          m_CurrentLaunchForce = Vector3.Distance(player.transform.position, transform.position);
+          m_CurrentLaunchForce = distToPlayer;
           Fire ();
 
           // record time shot was fired

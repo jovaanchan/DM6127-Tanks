@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_AITanks.Length; i++)
           {
             // create enemy tanks
-            m_AITanks[i].m_Instance = 
+            m_AITanks[i].m_Instance =
                 Instantiate(m_AITankPrefab, m_AITanks[i].m_SpawnPoint.position, m_AITanks[i].m_SpawnPoint.rotation) as GameObject;
             m_AITanks[i].Setup();
           }
@@ -130,7 +130,7 @@ public class GameManager : MonoBehaviour
         // Clear the text from the screen.
         m_MessageText.text = string.Empty;
 
-        // Dictionary to store 
+        // Dictionary to store
         Dictionary<Int32, DateTime> deadTanks = new Dictionary<Int32, DateTime>();
 
         // While there is not one tank left...
@@ -146,7 +146,7 @@ public class GameManager : MonoBehaviour
             }
             List<int> indexToDelete = new List<int>();
             foreach(var item in deadTanks)
-            { 
+            {
               if (item.Value.CompareTo(DateTime.Now) <= 0)
               {
                   m_AITanks[item.Key].Reset();
@@ -287,6 +287,11 @@ public class GameManager : MonoBehaviour
         {
             m_Tanks[i].EnableControl();
         }
+
+        for (int i = 0; i < m_AITanks.Length; i++)
+        {
+            m_AITanks[i].EnableControl();
+        }
     }
 
 
@@ -295,6 +300,11 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             m_Tanks[i].DisableControl();
+        }
+
+        for (int i = 0; i < m_AITanks.Length; i++)
+        {
+            m_AITanks[i].DisableControl();
         }
     }
 }
