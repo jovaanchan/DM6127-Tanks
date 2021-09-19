@@ -13,7 +13,9 @@ namespace Complete
         public CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
         public Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
         public GameObject m_TankPrefab;             // Reference to the prefab the players will control.
+        public GameObject m_AITankPrefab;           // Reference to AI Tank prefab
         public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
+        public AITankManager[] m_AITanks;           // A collection of managers for AITanks
 
         
         private int m_RoundNumber;                  // Which round the game is currently on.
@@ -48,6 +50,14 @@ namespace Complete
                 m_Tanks[i].m_PlayerNumber = i + 1;
                 m_Tanks[i].Setup();
             }
+
+            for (int i = 0; i < m_AITanks.Length; i++)
+            {
+              // create enemy tanks
+              m_AITanks[i].m_Instance = 
+                  Instantiate(m_AITankPrefab, m_AITanks[i].m_SpawnPoint.position, m_AITanks[i].m_SpawnPoint.rotation) as GameObject;
+              m_AITanks[i].Setup();
+            }
         }
 
 
@@ -71,6 +81,7 @@ namespace Complete
         // This is called from start and will run each phase of the game one after another.
         private IEnumerator GameLoop ()
         {
+            int level = 0;
             // Start off by running the 'RoundStarting' coroutine but don't return until it's finished.
             yield return StartCoroutine (RoundStarting ());
 
@@ -84,7 +95,9 @@ namespace Complete
             if (m_GameWinner != null)
             {
                 // If there is a game winner, restart the level.
-                SceneManager.LoadScene (0);
+                SceneManager.LoadScene (level);
+                // When we create more levels add code below
+                // level++;
             }
             else
             {
@@ -121,8 +134,8 @@ namespace Complete
             // Clear the text from the screen.
             m_MessageText.text = string.Empty;
 
-            // While there is not one tank left...
-            while (!OneTankLeft())
+            // While there is no alive players...
+            while (!PlayersStillAlive())
             {
                 // ... return on the next frame.
                 yield return null;
@@ -158,7 +171,7 @@ namespace Complete
 
 
         // This is used to check if there is one or fewer tanks remaining and thus the round should end.
-        private bool OneTankLeft()
+        private bool PlayersStillAlive()
         {
             // Start the count of tanks left at zero.
             int numTanksLeft = 0;
@@ -172,7 +185,7 @@ namespace Complete
             }
 
             // If there are one or fewer tanks remaining return true, otherwise return false.
-            return numTanksLeft <= 1;
+            return numTanksLeft <= 0;
         }
         
         
